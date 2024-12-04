@@ -20,19 +20,35 @@
 
 package com.spotify.styx.model;
 
-import io.norberg.automatter.AutoMatter;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.auto.value.AutoValue;
 
-@AutoMatter
-public interface TriggerResponse extends TriggerRequest {
-  String triggerId();
+@AutoValue
+public abstract class TriggerResponse {
+  @JsonProperty
+  public abstract WorkflowId workflowId();
 
-  static TriggerResponse of(WorkflowId workflowId, String parameter,
+  @JsonProperty
+  public abstract String parameter();
+
+  @JsonProperty
+  public abstract String triggerId();
+
+  @JsonProperty
+  public abstract TriggerParameters triggerParameters();
+
+  @JsonCreator
+  public static TriggerResponse create(
+          @JsonProperty("workflow_id") WorkflowId workflowId,
+          @JsonProperty("parameter") String parameter,
+          @JsonProperty("trigger_id") String triggerId,
+          @JsonProperty("trigger_parameters") TriggerParameters triggerParameters) {
+    return of(workflowId, parameter, triggerParameters, triggerId);
+  }
+
+  public static TriggerResponse of(WorkflowId workflowId, String parameter,
                             TriggerParameters triggerParameters, String triggerId) {
-    return new TriggerResponseBuilder()
-        .workflowId(workflowId)
-        .parameter(parameter)
-        .triggerParameters(triggerParameters)
-        .triggerId(triggerId)
-        .build();
+    return new AutoValue_TriggerResponse(workflowId, parameter, triggerId, triggerParameters);
   }
 }

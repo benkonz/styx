@@ -58,6 +58,7 @@ import com.spotify.styx.model.Resource;
 import com.spotify.styx.model.Schedule;
 import com.spotify.styx.model.TriggerParameters;
 import com.spotify.styx.model.TriggerRequest;
+import com.spotify.styx.model.TriggerResponse;
 import com.spotify.styx.model.Workflow;
 import com.spotify.styx.model.WorkflowConfiguration;
 import com.spotify.styx.model.WorkflowId;
@@ -687,7 +688,7 @@ public class StyxOkHttpClientTest {
   public void testTokenSuccess() {
     when(client.send(any(Request.class)))
         .thenReturn(CompletableFuture.completedFuture(response(HTTP_OK)));
-    final CompletableFuture<Void> r =
+    final CompletableFuture<TriggerResponse> r =
         styx.triggerWorkflowInstance("foo", "bar", "baz").toCompletableFuture();
     verify(client, timeout(30_000)).send(requestCaptor.capture());
     assertThat(r.isDone(), is(true));
@@ -782,14 +783,22 @@ public class StyxOkHttpClientTest {
   public void testTriggerWorkflowInstance() throws IOException {
     final TriggerRequest triggerRequest = TriggerRequest.of(WORKFLOW_1.id(), "2017-01-01",
         TriggerParameters.zero());
-    when(client.send(any(Request.class))).thenReturn(CompletableFuture.completedFuture(
-        response(HTTP_OK)));
-    final CompletableFuture<Void> r =
+
+    final TriggerResponse triggerResponseData = TriggerResponse.of(
+            WorkflowId.create("component", "workflow"), "2017-01-01",
+            TriggerParameters.zero(), "UNKNOWN");
+
+    when(client.send(any(Request.class)))
+            .thenReturn(CompletableFuture.completedFuture(response(HTTP_OK, triggerResponseData)));
+
+    final CompletableFuture<TriggerResponse> r =
         styx.triggerWorkflowInstance(WORKFLOW_1.componentId(), WORKFLOW_1.workflowId(),
             "2017-01-01").toCompletableFuture();
 
     verify(client, timeout(30_000)).send(requestCaptor.capture());
     assertThat(r.isDone(), is(true));
+    TriggerResponse triggerResponse = r.join();
+    assertThat(triggerResponseData, is(triggerResponse));
     final Request request = requestCaptor.getValue();
     assertThat(request.url().toString(), is(API_URL + "/scheduler/trigger?allowFuture=false"));
     assertThat(request.method(), is("POST"));
@@ -801,14 +810,20 @@ public class StyxOkHttpClientTest {
   public void testTriggerWorkflowInstanceAllowFuture() throws IOException {
     final TriggerRequest triggerRequest = TriggerRequest.of(WORKFLOW_1.id(), "2017-01-01",
         TriggerParameters.zero());
-    when(client.send(any(Request.class))).thenReturn(CompletableFuture.completedFuture(
-        response(HTTP_OK)));
-    final CompletableFuture<Void> r =
+    final TriggerResponse triggerResponseData = TriggerResponse.of(
+            WorkflowId.create("component", "workflow"), "2017-01-01",
+            TriggerParameters.zero(), "UNKNOWN");
+
+    when(client.send(any(Request.class)))
+            .thenReturn(CompletableFuture.completedFuture(response(HTTP_OK, triggerResponseData)));
+    final CompletableFuture<TriggerResponse> r =
         styx.triggerWorkflowInstance(WORKFLOW_1.componentId(), WORKFLOW_1.workflowId(),
             "2017-01-01").toCompletableFuture();
 
     verify(client, timeout(30_000)).send(requestCaptor.capture());
     assertThat(r.isDone(), is(true));
+    TriggerResponse triggerResponse = r.join();
+    assertThat(triggerResponseData, is(triggerResponse));
     final Request request = requestCaptor.getValue();
     assertThat(request.url().toString(), is(API_URL + "/scheduler/trigger?allowFuture=false"));
     assertThat(request.method(), is("POST"));
@@ -823,14 +838,20 @@ public class StyxOkHttpClientTest {
         .build();
     final TriggerRequest triggerRequest =
         TriggerRequest.of(WORKFLOW_1.id(), "2017-01-01", triggerParameters);
+    final TriggerResponse triggerResponseData = TriggerResponse.of(
+            WorkflowId.create("component", "workflow"), "2017-01-01",
+            triggerParameters, "UNKNOWN");
+
     when(client.send(any(Request.class)))
-        .thenReturn(CompletableFuture.completedFuture(response(HTTP_OK)));
-    final CompletableFuture<Void> r =
+            .thenReturn(CompletableFuture.completedFuture(response(HTTP_OK, triggerResponseData)));
+    final CompletableFuture<TriggerResponse> r =
         styx.triggerWorkflowInstance(WORKFLOW_1.componentId(), WORKFLOW_1.workflowId(),
             "2017-01-01", triggerParameters, true).toCompletableFuture();
 
     verify(client, timeout(30_000)).send(requestCaptor.capture());
     assertThat(r.isDone(), is(true));
+    TriggerResponse triggerResponse = r.join();
+    assertThat(triggerResponseData, is(triggerResponse));
     final Request request = requestCaptor.getValue();
     assertThat(request.url().toString(), is(API_URL + "/scheduler/trigger?allowFuture=true"));
     assertThat(request.method(), is("POST"));

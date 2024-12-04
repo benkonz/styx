@@ -21,6 +21,7 @@
 package com.spotify.styx.client;
 
 import com.spotify.styx.model.TriggerParameters;
+import com.spotify.styx.model.TriggerResponse;
 import com.spotify.styx.model.WorkflowInstance;
 import java.util.concurrent.CompletionStage;
 
@@ -36,9 +37,9 @@ public interface StyxSchedulerClient extends AutoCloseable {
    * @param workflowId  workflow id
    * @param parameter   parameter
    */
-  CompletionStage<Void> triggerWorkflowInstance(String componentId,
-                                                String workflowId,
-                                                String parameter);
+  CompletionStage<TriggerResponse> triggerWorkflowInstance(String componentId,
+                                                           String workflowId,
+                                                           String parameter);
 
   /**
    * Trigger a {@link WorkflowInstance}
@@ -48,7 +49,7 @@ public interface StyxSchedulerClient extends AutoCloseable {
    * @param parameter   parameter
    * @param triggerParameters additional parameters for the {@link WorkflowInstance} 
    */
-  CompletionStage<Void> triggerWorkflowInstance(String componentId,
+  CompletionStage<TriggerResponse> triggerWorkflowInstance(String componentId,
                                                 String workflowId,
                                                 String parameter,
                                                 TriggerParameters triggerParameters);
@@ -62,7 +63,7 @@ public interface StyxSchedulerClient extends AutoCloseable {
    * @param triggerParameters additional parameters for the {@link WorkflowInstance}
    * @param allowFuture allow triggering future partition
    */
-  CompletionStage<Void> triggerWorkflowInstance(String componentId,
+  CompletionStage<TriggerResponse> triggerWorkflowInstance(String componentId,
                                                 String workflowId,
                                                 String parameter,
                                                 TriggerParameters triggerParameters,

@@ -42,6 +42,7 @@ import com.spotify.styx.model.Event;
 import com.spotify.styx.model.Resource;
 import com.spotify.styx.model.TriggerParameters;
 import com.spotify.styx.model.TriggerRequest;
+import com.spotify.styx.model.TriggerResponse;
 import com.spotify.styx.model.Workflow;
 import com.spotify.styx.model.WorkflowConfiguration;
 import com.spotify.styx.model.WorkflowId;
@@ -246,13 +247,13 @@ class StyxOkHttpClient implements StyxClient {
   }
 
   @Override
-  public CompletionStage<Void> triggerWorkflowInstance(String componentId, String workflowId,
+  public CompletionStage<TriggerResponse> triggerWorkflowInstance(String componentId, String workflowId,
       String parameter) {
     return triggerWorkflowInstance(componentId, workflowId, parameter, TriggerParameters.zero());
   }
 
   @Override
-  public CompletionStage<Void> triggerWorkflowInstance(String componentId,
+  public CompletionStage<TriggerResponse> triggerWorkflowInstance(String componentId,
                                                        String workflowId,
                                                        String parameter,
                                                        TriggerParameters triggerParameters) {
@@ -260,7 +261,7 @@ class StyxOkHttpClient implements StyxClient {
   }
 
   @Override
-  public CompletionStage<Void> triggerWorkflowInstance(String componentId,
+  public CompletionStage<TriggerResponse> triggerWorkflowInstance(String componentId,
                                                        String workflowId,
                                                        String parameter,
                                                        TriggerParameters triggerParameters,
@@ -269,8 +270,7 @@ class StyxOkHttpClient implements StyxClient {
         TriggerRequest.of(WorkflowId.create(componentId, workflowId), parameter, triggerParameters);
     return execute(
         forUri(urlBuilder("scheduler", "trigger")
-            .addQueryParameter("allowFuture", String.valueOf(allowFuture)), "POST", triggerRequest))
-        .thenAccept(response -> Optional.ofNullable(response.body()).ifPresent(ResponseBody::close));
+            .addQueryParameter("allowFuture", String.valueOf(allowFuture)), "POST", triggerRequest), TriggerResponse.class);
   }
 
   @Override
